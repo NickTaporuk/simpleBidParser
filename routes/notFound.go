@@ -14,7 +14,7 @@ type NotFoundJsonResponse struct {
 	Time      int64  `json:"timestamp"`
 }
 
-func NotFound(w http.ResponseWriter, r *http.Request) {
+func NotFoundHandler(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
 	
 	notFoundResponse := &NotFoundJsonResponse{

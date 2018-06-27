@@ -3,9 +3,7 @@ package routes
 import (
 	"net/http"
 	"encoding/json"
-	"github.com/julienschmidt/httprouter"
 	"github.com/mileusna/useragent"
-	"fmt"
 )
 
 const (
@@ -24,7 +22,7 @@ type BidParser struct {
 	Url        string `json:"url,omitempty"`
 }
 
-func Index(w http.ResponseWriter, r *http.Request, _ httprouter.Params) {
+func IndexHandler(w http.ResponseWriter, r *http.Request) {
 
 	w.Header().Set("Content-Type", "application/json")
 	ua := ua.Parse(r.Header.Get("User-Agent"))
@@ -42,13 +40,12 @@ func Index(w http.ResponseWriter, r *http.Request, _ httprouter.Params) {
 		BidParser.DeviceType = DeviceTypeTablet
 	} else if ua.Desktop {
 		BidParser.DeviceType = DeviceTypeDesktop
-	}else if ua.Bot {
+	} else if ua.Bot {
 		BidParser.DeviceType = DeviceTypeBot
 	}
-	//if ua.URL != "" {
-	//	fmt.Println(ua.URL)
-	//}
 
 	json, _ := json.Marshal(BidParser)
+
+	w.WriteHeader(http.StatusOK)
 	w.Write(json)
 }
