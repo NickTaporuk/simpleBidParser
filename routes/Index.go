@@ -45,14 +45,16 @@ func SetDeviceTypeByUserAgent(agent *ua.UserAgent, bp *BidParser) {
 	bp.Browser = agent.Name
 }
 
-func SetUrl(br *openrtb.BidRequest, bp *BidParser) {
+func SetUrl(br *openrtb.BidRequest, bp *BidParser, r *http.Request) {
 	if br.App != nil {
 		bp.Url = br.App.Domain
+	} else {
+		bp.Url = r.Header.Get("Host")
 	}
 }
 
 func SetCountryByIp(path string, bp *BidParser, ipClient string) error {
-	fmt.Println("IP===>", ipClient)
+
 	db, err := geoip2.Open(path)
 
 	if err != nil {
@@ -69,11 +71,9 @@ func SetCountryByIp(path string, bp *BidParser, ipClient string) error {
 
 	userIP := net.ParseIP(ip)
 	if userIP == nil {
-		return fmt.Errorf( "userip: %q is not IP:port", ipClient)
+		return fmt.Errorf("userip: %q is not IP:port", ipClient)
 	}
 
-
-	fmt.Println("Parse IP===>",userIP)
 	if userIP == nil {
 		bp.Country = "localhost"
 	} else {
@@ -102,7 +102,7 @@ func IndexHandler(w http.ResponseWriter, r *http.Request) {
 
 		json.Unmarshal([]byte(body), &req)
 
-		SetUrl(&req,&bidParser)
+		SetUrl(&req, &bidParser, r)
 
 	}
 
@@ -110,7 +110,11 @@ func IndexHandler(w http.ResponseWriter, r *http.Request) {
 	ua := ua.Parse(r.Header.Get("User-Agent"))
 
 	SetDeviceTypeByUserAgent(&ua, &bidParser)
-	SetCountryByIp(MaxMindCountryDbPath,&bidParser, r.RemoteAddr)
+
+	errFromIp := SetCountryByIp(MaxMindCountryDbPath, &bidParser, r.RemoteAddr)
+	if errFromIp != nil {
+		http.Error(w, "Error reading request body", http.StatusInternalServerError)
+	}
 	json, _ := json.Marshal(bidParser)
 
 	w.WriteHeader(http.StatusOK)
