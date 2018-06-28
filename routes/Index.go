@@ -52,6 +52,7 @@ func SetUrl(br *openrtb.BidRequest, bp *BidParser) {
 }
 
 func SetCountryByIp(path string, bp *BidParser, ipClient string) {
+	fmt.Println("IP===>", ipClient)
 	db, err := geoip2.Open(path)
 
 	if err != nil {
