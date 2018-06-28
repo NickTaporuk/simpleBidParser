@@ -61,7 +61,7 @@ func SetCountryByIp(path string, bp *BidParser, ipClient string) {
 	defer db.Close()
 
 	ip := net.ParseIP(ipClient)
-
+	fmt.Println("Parse IP===>",ip)
 	if ip == nil {
 		bp.Country = "localhost"
 	} else {
