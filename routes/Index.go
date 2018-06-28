@@ -51,7 +51,7 @@ func SetUrl(br *openrtb.BidRequest, bp *BidParser) {
 	}
 }
 
-func SetCountryByIp(path string, bp *BidParser, ipClient string) {
+func SetCountryByIp(path string, bp *BidParser, ipClient string) error {
 	fmt.Println("IP===>", ipClient)
 	db, err := geoip2.Open(path)
 
@@ -60,19 +60,33 @@ func SetCountryByIp(path string, bp *BidParser, ipClient string) {
 	}
 	defer db.Close()
 
-	ip := net.ParseIP(ipClient)
-	fmt.Println("Parse IP===>",ip)
-	if ip == nil {
+	ip, _, err := net.SplitHostPort(ipClient)
+	if err != nil {
+		return fmt.Errorf("userip: %q is not IP:port", ipClient)
+
+		//fmt.Fprintf(w, "userip: %q is not IP:port", req.RemoteAddr)
+	}
+
+	userIP := net.ParseIP(ip)
+	if userIP == nil {
+		return fmt.Errorf( "userip: %q is not IP:port", ipClient)
+	}
+
+
+	fmt.Println("Parse IP===>",userIP)
+	if userIP == nil {
 		bp.Country = "localhost"
 	} else {
 
-		record, err := db.Country(ip)
+		record, err := db.Country(userIP)
 
 		if err != nil {
 			log.Fatal(err)
 		}
 		bp.Country = record.Country.IsoCode
 	}
+
+	return nil
 }
 
 func IndexHandler(w http.ResponseWriter, r *http.Request) {
