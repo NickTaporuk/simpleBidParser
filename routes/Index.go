@@ -28,7 +28,7 @@ type BidParser struct {
 	Url        string `json:"url,omitempty"`
 }
 
-func SetDeviceTypeByUserAgent(agent *ua.UserAgent, bp *BidParser) {
+func SetDataByUserAgent(agent *ua.UserAgent, bp *BidParser) {
 
 	switch {
 	case agent.Mobile:
@@ -65,8 +65,6 @@ func SetCountryByIp(path string, bp *BidParser, ipClient string) error {
 	ip, _, err := net.SplitHostPort(ipClient)
 	if err != nil {
 		return fmt.Errorf("userip: %q is not IP:port", ipClient)
-
-		//fmt.Fprintf(w, "userip: %q is not IP:port", req.RemoteAddr)
 	}
 
 	userIP := net.ParseIP(ip)
@@ -109,7 +107,7 @@ func IndexHandler(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
 	ua := ua.Parse(r.Header.Get("User-Agent"))
 
-	SetDeviceTypeByUserAgent(&ua, &bidParser)
+	SetDataByUserAgent(&ua, &bidParser)
 
 	errFromIp := SetCountryByIp(MaxMindCountryDbPath, &bidParser, r.RemoteAddr)
 	if errFromIp != nil {
