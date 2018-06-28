@@ -9,7 +9,7 @@ import (
 
 func main() {
 	router := mux.NewRouter()
-	router.HandleFunc("/", routes.IndexHandler).Methods("POST","GET")
+	router.HandleFunc("/", routes.IndexHandler).Methods("POST")
 	router.NotFoundHandler = http.HandlerFunc(routes.NotFoundHandler)
 
 	server := &http.Server{
